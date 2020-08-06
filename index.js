@@ -1,8 +1,10 @@
 const express = require('express')
 const path = require('path')
 const mongoose = require('mongoose')
+const flash = require('connect-flash')
 const exphbs = require('express-handlebars')
 const csrf = require('csurf')
+const { MONGO_URI, SECRET } = require('./keys')
 const session = require('express-session')
 const MongoStore = require('connect-mongodb-session')(session)
 const varMiddleware = require('./middleware/variables')
@@ -13,8 +15,6 @@ const addRoutes = require('./routes/add')
 const ordersRoutes = require('./routes/orders')
 const coursesRoutes = require('./routes/courses')
 const authRoutes = require('./routes/auth')
-const User = require('./models/user')
-const { Http2ServerRequest } = require('http2')
 
 const app = express()
 
@@ -22,8 +22,6 @@ const hbs = exphbs.create({
   defaultLayout: 'main',
   extname: 'hbs'
 })
-
-const MONGO_URI = `mongodb+srv://stephan:R_U_MINE@cluster0.zsq38.mongodb.net/5f291919250c3d0f95d2018c?retryWrites=true&w=majority`
 
 const store = MongoStore({
   collection: 'sessions',
@@ -37,12 +35,13 @@ app.set('views', 'views')
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.urlencoded({extended: true}))
 app.use(session({
-  secret: 'fkgbvmed',
+  secret: SECRET,
   resave: false,
   saveUninitialized: false,
   store
 }))
 app.use(csrf())
+app.use(flash())
 app.use(varMiddleware)
 app.use(userMiddleware)
 

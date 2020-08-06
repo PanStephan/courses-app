@@ -6,7 +6,8 @@ const router = Router()
 router.get('/login', async (req, res) => {
   res.render('auth/login', {
     title: 'Авторизация',
-    isLogin: true
+    isLogin: true,
+    error: req.flash('error')    
   })
 })
 
@@ -31,9 +32,12 @@ router.post('/login', async (req, res) => {
 
 router.post('/register', async  (req, res) => {
   try {
-    const {email, password, repeat, name} = req.body
+    const {email, password, name} = req.body
     const condidate = await User.findOne({ email })
-    if (condidate) return res.redirect('/auth/login#register')
+    if (condidate) {
+      req.flash('error', 'email занят')
+      res.redirect('/auth/login#register')
+    } 
     const hashPassword = await bcrypt.hash(password, 10)
     const user = new User({
       email, name, password: hashPassword, cart: { items: [] }
